@@ -37,7 +37,7 @@ Canvas下のTextMeshProのオブジェクトにアタッチし、取ったオブ
 Canvas下のTextMeshProのオブジェクトにアタッチし、タイマーを表示するのに使います。
 
 #### HighScoreDisplay
-スクリプトはありませんがハイスコア表示用にTextMeshProを作っておいてください。
+スクリプトはありませんがハイスコア表示用のTextMeshProをCanvas下に作っておいてください。
 
 ### GameSystem
 Emptyオブジェクトなどにアタッチして使います。
