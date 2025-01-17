@@ -15,12 +15,13 @@ public class GameSystem : MonoBehaviour
     [SerializeField] TextMeshProUGUI highScoreDisplay;//ハイスコア表示用TMPro
     [SerializeField] AudioSource PickUpSE;//アイテム取得時の音を鳴らすAudioSourse
     [SerializeField] AudioSource HitSE;//Hazardコリジョン接触時の音を鳴らすAudioSourse
-    [SerializeField] string[] tutorialMessages = new string[3];//チュートリアルメッセージのテキスト
+    [SerializeField] private string[] tutorialMessages = new string[3];//チュートリアルメッセージのテキスト
+    [SerializeField] private bool IsClearOnAllItemsCollected=true;//全アイテム回収でゴールとするか否か
     private int score = 0;//スコアの値
     private Vector3 playerRespawnAt;//リスポーンポイントの座標
     private int highScorePoint;//ハイスコアのポイント
     private float highScoreTime;//ハイスコアのタイム
-    private bool playerIsDead;//プレイヤーがHazardコリジョンに接触してからリスポーンするまでTrueになるフラグ
+    private bool playerIsDead;//プレイヤーがHazardコリジョンに接触してからリスポーンするまでTrueになるフラグ 
 
     void Start()
     {
@@ -161,6 +162,7 @@ public class GameSystem : MonoBehaviour
         if(timerDisplay!=null)timerDisplay.StopTimer();
         playerMove.EnableControl(false);
         playerMove.OnHazardEnter -= HandleGoalTrigger;
+        playerMove.OnHazardEnter -= HandleHazardCollision;//Hazard判定を止めておく
         //ゴール表示
         if(textController!=null)textController.DisplayMessage(tutorialMessages[2]);
         float clearTime = timerDisplay.GetTime();
@@ -202,6 +204,9 @@ public class GameSystem : MonoBehaviour
         score++;
         if(scoreDisplay!=null)scoreDisplay.SetScore(score);
         if(PickUpSE!=null)PickUpSE.Play();
+        if(IsClearOnAllItemsCollected && score == items.Length){//全アイテム回収でゴールとする場合のゴール判定
+            StartCoroutine(ProcessGoalSequence());//ゴールプロセスの開始
+        }
     }
 
     //リトライの処理
