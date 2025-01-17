@@ -1,7 +1,10 @@
 # Modify Roll A Ballの使い方
-##はじめに
+## はじめに
 Modify Roll A Ballはスクリプトをオブジェクトにアタッチするだけでとりあえず動く、GameSystemをアタッチしてセッティングすればゲームとしても動作するというスクリプトのセットです。
 基本的にはコードエディタを開いて中身を書き換える必要はありません。
+
+サンプルはこちらからプレイできます。
+https://play.unity.com/ja/games/c75aa7ca-4c3a-4c83-af2d-bbf5811cc553/modify-roll-a-ball-with-unity-6
 
 Unityの基本的な使い方から学びたい時は先に以下の動画を見ておきましょう。
 https://www.youtube.com/watch?v=NgYG1_Si22A
