@@ -18,7 +18,7 @@ public class GameSystem : MonoBehaviour
     [SerializeField] private string[] tutorialMessages = new string[3];//チュートリアルメッセージのテキスト
     [SerializeField] private bool IsClearOnAllItemsCollected=true;//全アイテム回収でゴールとするか否か
     private int score = 0;//スコアの値
-    private Vector3 playerRespawnAt;//リスポーンポイントの座標
+    [SerializeField] private Vector3 playerRespawnAt = new Vector3(0,5,0);//リスポーンポイントの座標
     private int highScorePoint;//ハイスコアのポイント
     private float highScoreTime;//ハイスコアのタイム
     private bool playerIsDead;//プレイヤーがHazardコリジョンに接触してからリスポーンするまでTrueになるフラグ 
