@@ -51,7 +51,6 @@ public class GameSystem : MonoBehaviour
         //スコアのセットと表示
         if(scoreDisplay!=null && items!=null)
         {
-            Debug.Log(scoreDisplay.gameObject.name);
             scoreDisplay.SetMaxScore(items.Length);
             scoreDisplay.SetScore(0);
         }
