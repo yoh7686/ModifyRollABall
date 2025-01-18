@@ -39,11 +39,14 @@ public class GameSystem : MonoBehaviour
         cameraFollow = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<CameraFollow>();
         // Itemタグの全オブジェクトを探す
         GameObject[] itemObjects = GameObject.FindGameObjectsWithTag("Item");
-        items = new Item[itemObjects.Length];
-        for (int i = 0; i < itemObjects.Length; i++)
+        if(items!=null)
         {
-            items[i] = itemObjects[i].GetComponent<Item>();
-            items[i].OnTriggerEnterAndDestroyed += HandleItemDestroyed;//アイテムがPlayerと接触したら呼ばれる
+            items = new Item[itemObjects.Length];
+            for (int i = 0; i < itemObjects.Length; i++)
+            {
+                items[i] = itemObjects[i].GetComponent<Item>();
+                items[i].OnTriggerEnterAndDestroyed += HandleItemDestroyed;//アイテムがPlayerと接触したら呼ばれる
+            }
         }
         //スコアのセットと表示
         if(scoreDisplay!=null)
@@ -53,10 +56,13 @@ public class GameSystem : MonoBehaviour
         }
         // Gateタグの全オブジェクトを探す
         GameObject[] gateObjects = GameObject.FindGameObjectsWithTag("Gate");
-        gates = new GateController[gateObjects.Length];
-        for (int i = 0; i < gateObjects.Length; i++)
+        if(gateObjects!=null)
         {
-            gates[i] = gateObjects[i].GetComponent<GateController>();
+            gates = new GateController[gateObjects.Length];
+            for (int i = 0; i < gateObjects.Length; i++)
+            {
+                gates[i] = gateObjects[i].GetComponent<GateController>();
+            }
         }
         //RespawnPointに接触した時の処理
         playerMove.OnRespawnEnter += HandleRespawnCollision;
@@ -192,11 +198,14 @@ public class GameSystem : MonoBehaviour
     {
         ScoreUp();
         // 新しいスコアを全てのGateに通知する
-        if(gates.Length>0)
+        if(gates!=null)
         {
-            foreach (var gate in gates)
+            if(gates.Length>0)
             {
-                gate.UpdateScore(score);
+                foreach (var gate in gates)
+                {
+                    gate.UpdateScore(score);
+                }
             }
         }
     }
