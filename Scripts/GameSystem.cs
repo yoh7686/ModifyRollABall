@@ -192,9 +192,12 @@ public class GameSystem : MonoBehaviour
     {
         ScoreUp();
         // 新しいスコアを全てのGateに通知する
-        foreach (var gate in gates)
+        if(gates.Length>0)
         {
-            gate.UpdateScore(score);
+            foreach (var gate in gates)
+            {
+                gate.UpdateScore(score);
+            }
         }
     }
 
