@@ -39,7 +39,7 @@ public class GameSystem : MonoBehaviour
         cameraFollow = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<CameraFollow>();
         // Itemタグの全オブジェクトを探す
         GameObject[] itemObjects = GameObject.FindGameObjectsWithTag("Item");
-        if(items!=null)
+        if(itemObjects!=null)
         {
             items = new Item[itemObjects.Length];
             for (int i = 0; i < itemObjects.Length; i++)
@@ -49,8 +49,9 @@ public class GameSystem : MonoBehaviour
             }
         }
         //スコアのセットと表示
-        if(scoreDisplay!=null)
+        if(scoreDisplay!=null && items!=null)
         {
+            Debug.Log(scoreDisplay.gameObject.name);
             scoreDisplay.SetMaxScore(items.Length);
             scoreDisplay.SetScore(0);
         }
