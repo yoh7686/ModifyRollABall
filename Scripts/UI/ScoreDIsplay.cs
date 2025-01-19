@@ -1,7 +1,6 @@
 using TMPro;
 using UnityEngine;
 using System.Collections;
-using System;
 
 public class ScoreDisplay : MonoBehaviour
 {
@@ -16,6 +15,7 @@ public class ScoreDisplay : MonoBehaviour
     private string pointText;
     private string timeText;
     private string highScoreText;
+    private GameSystem gameSystem;
     [SerializeField]int HighScoreTextSize=-1;
 
     void Awake()
@@ -45,7 +45,7 @@ public class ScoreDisplay : MonoBehaviour
                 yield return null;  // 1フレーム待機し次のフレームに処理を移行
             }
         }
-        GameSystem gameSystem = target.GetComponent<GameSystem>();
+        gameSystem = target.GetComponent<GameSystem>();
         gameSystem.SetScoreDisplay(this);
     }
     void Start(){
@@ -62,6 +62,9 @@ public class ScoreDisplay : MonoBehaviour
             timeText = SetTimerText(currentTime);
             UpdateScoreDisplay();
         }
+        if(Input.GetKeyDown(KeyCode.Return)){
+            gameSystem.onRetryButtonClick();
+        }
     }
     //表示の更新
     void UpdateScoreDisplay(){
@@ -76,9 +79,11 @@ public class ScoreDisplay : MonoBehaviour
     //スコア最大数のセット
     public void SetMaxScore(int score)
     {
+        Debug.Log("SetMacScore");
         maxScore = score;
         pointText=SetScoreText(currentScore,maxScore);
         if(highScoreTime!=0)SetHighScore(highScorePoint,highScoreTime);
+        UpdateScoreDisplay();
     }
     //ハイスコアのセット
     private void SetHighScore(int score, float time){

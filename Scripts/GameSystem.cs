@@ -17,6 +17,8 @@ public class GameSystem : MonoBehaviour
     [SerializeField] private bool IsClearOnAllItemsCollected=true;//全アイテム回収でゴールとするか否か
     [SerializeField] private Vector3 playerRespawnAt = new Vector3(0,5,0);//リスポーンポイントの座標
     [SerializeField] private string[] tutorialMessages = new string[3];//チュートリアルメッセージのテキスト
+
+    [SerializeField] private string SceneName = "SampleScene";
     private int score = 0;//スコアの値
     private int maxScorePoint;//アイテムを全部取った時のポイント
     private bool playerIsDead;//プレイヤーがHazardコリジョンに接触してからリスポーンするまでTrueになるフラグ 
@@ -177,32 +179,41 @@ public class GameSystem : MonoBehaviour
     //リトライの処理
     public void onRetryButtonClick()
     {
-        SceneManager.LoadScene("Game");
+        SceneManager.LoadScene(SceneName);
     }
+    //Attackボタンが押されたらリトライ
 
     //itemのセット
     public void SetItems(Item item)
     {
+        Debug.Log("Itemがセットされた");
         maxScorePoint += 1;
         item.OnTriggerEnterAndDestroyed += HandleItemDestroyed;//アイテムがPlayerと接触したら呼ばれる
-        //スコアのセットと表示
-        if(scoreDisplay!=null)
+        //ScoreDisplayがアタッチされたらスコアのセットと表示
+        StartCoroutine(WaitAttachingScoreDisplay());
+    }
+    IEnumerator WaitAttachingScoreDisplay()
+    {
+        while (scoreDisplay == null)
         {
-            scoreDisplay.SetMaxScore(maxScorePoint);
-            scoreDisplay.SetScore(0);
+            yield return null;  // 1フレーム待機し次のフレームに処理を移行
         }
+        scoreDisplay.SetMaxScore(maxScorePoint);
     }
     //gateのセット
     public void SetGates(GateController gateController)
     {
+        Debug.Log("Gateがセットされた");
         gateList.Add(gateController);
     }
     //TextControllerのセット
     public void SetTextController(TextController tc){
+        Debug.Log("TextControllerがセットされた");
         textController = tc;
     }
     //ScoreDisplayのセット
     public void SetScoreDisplay(ScoreDisplay sd){
+        Debug.Log("ScoreDisplayがセットされた");
         scoreDisplay = sd;
     }
 }

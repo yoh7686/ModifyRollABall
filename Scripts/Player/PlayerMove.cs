@@ -17,13 +17,14 @@ public class PlayerMove : MonoBehaviour
     public event PlayerCollisionEnterDelegate OnRespawnEnter; // リスタートポイントタグでの衝突時のイベント定義
     public event PlayerCollisionEnterDelegate OnGoalEnter; // ゴールタグでの衝突時のイベント定義
     //スタート時の処理
-    void Start()
+    void Awake()
     {
         rb = GetComponent<Rigidbody>();
         //Playerタグがセットされているかをチェック
         if(!gameObject.CompareTag("Player"))
         {
-            Debug.LogError("PlayerオブジェクトのタグをPlayerにセットしてください");
+            Debug.Log("PlayerオブジェクトのタグをPlayerにセットしてください");
+            gameObject.tag = "Player";
         }
 
     }
@@ -91,7 +92,7 @@ public class PlayerMove : MonoBehaviour
 
     }
 
-    //
+    //リスポーンの際に速度をリセット
     public void StopMovement()
     {
         // playerの速度を0にする
