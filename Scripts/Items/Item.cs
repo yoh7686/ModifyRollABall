@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 public class Item : MonoBehaviour
 {
@@ -6,20 +7,31 @@ public class Item : MonoBehaviour
     public delegate void TriggerEnterAndDestroyDelegate(Item item);//イベント型の宣言
     public event TriggerEnterAndDestroyDelegate OnTriggerEnterAndDestroyed; //指定のタグのオブジェクトに接触したら呼ばれるイベント
 
-    private void Start()
+    private void Awake()
     {
+        StartCoroutine(FindTarget());
         //isTriggerがtrueかチェック
         BoxCollider boxCollider=GetComponent<BoxCollider>();
         if(boxCollider==null){
             Debug.LogError("BoxColliderがアタッチされていません！");
         }else if(!boxCollider.isTrigger){
-            Debug.LogError("BoxColliderのisTriggerがチェックされていません！");
+            boxCollider.isTrigger = true;
         }
-        //Itemタグになっているかチェック
-        if(!gameObject.CompareTag("Item"))
+    }
+    //GameSystemを探すコルーチン
+    IEnumerator FindTarget()
+    {
+        GameObject target = null;
+        while (target == null)
         {
-            Debug.LogError("ItemオブジェクトのタグをItemにセットしてください");
+            target = GameObject.FindWithTag("GameController");
+            if (target == null)
+            {
+                yield return null;  // 1フレーム待機し次のフレームに処理を移行
+            }
         }
+        GameSystem gameSystem = target.GetComponent<GameSystem>();
+        gameSystem.SetItems(this);
     }
 
     //コライダーの範囲に他のオブジェクトが入ったら呼ばれる

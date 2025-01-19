@@ -1,100 +1,63 @@
 using UnityEngine;
 using System.Collections;//コルーチンを使うために必要
 using TMPro;//TextMeshProを使うために必要
-using UnityEngine.SceneManagement;//シーンのロードのために必要
+using UnityEngine.SceneManagement;
+using System.Collections.Generic;
+[RequireComponent(typeof(AudioSource))]
 
 public class GameSystem : MonoBehaviour
 {
     private PlayerMove playerMove;//プレイヤーのスクリプト
-    private Item[] items;//アイテムのスクリプト
-    private GateController[] gates;//ゲートのスクリプト
     private CameraFollow cameraFollow;//カメラのスクリプト
-    [SerializeField] TextController textController;//メッセージ表示用スクリプト
-    [SerializeField] TimerDisplay timerDisplay;//タイム表示用スクリプト
-    [SerializeField] ScoreDisplay scoreDisplay;//スコア表示用スクリプト
-    [SerializeField] TextMeshProUGUI highScoreDisplay;//ハイスコア表示用TMPro
-    [SerializeField] AudioSource PickUpSE;//アイテム取得時の音を鳴らすAudioSourse
-    [SerializeField] AudioSource HitSE;//Hazardコリジョン接触時の音を鳴らすAudioSourse
-    [SerializeField] private string[] tutorialMessages = new string[3];//チュートリアルメッセージのテキスト
+    [SerializeField] private List<GateController> gateList = new List<GateController>(); 
+    TextController textController = null;//メッセージ表示用スクリプト
+    ScoreDisplay scoreDisplay = null;//スコア表示用スクリプト
+    [SerializeField] AudioClip PickUpSE;//アイテム取得時の音を鳴らすAudioClip
+    [SerializeField] AudioClip HitSE;//Hazardコリジョン接触時の音を鳴らすAudioClip
     [SerializeField] private bool IsClearOnAllItemsCollected=true;//全アイテム回収でゴールとするか否か
-    private int score = 0;//スコアの値
     [SerializeField] private Vector3 playerRespawnAt = new Vector3(0,5,0);//リスポーンポイントの座標
-    private int highScorePoint;//ハイスコアのポイント
-    private float highScoreTime;//ハイスコアのタイム
+    [SerializeField] private string[] tutorialMessages = new string[3];//チュートリアルメッセージのテキスト
+    private int score = 0;//スコアの値
+    private int maxScorePoint;//アイテムを全部取った時のポイント
     private bool playerIsDead;//プレイヤーがHazardコリジョンに接触してからリスポーンするまでTrueになるフラグ 
+    private AudioSource audioSource;
 
-    void Start()
-    {
+    void Awake(){
+        gameObject.tag = "GameController";
         //tutorialMessageの設定（入力しなくても動くよう設定。自身で書きたい方はこれを消してインスペクタに入れてください）
         tutorialMessages[0]="AWSD or ←↑→↓\nto Move";
         tutorialMessages[1]="Respawn!";
         tutorialMessages[2]="Goal!";
+        audioSource = gameObject.GetComponent<AudioSource>();
+    }
+    void Start()
+    {
         //Playerを探す
+        StartCoroutine(FindTarget());
+        if(scoreDisplay!=null)scoreDisplay.StopTimer();//始まるまでタイマーを止めておく
+        //メインカメラを探す
+        cameraFollow = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<CameraFollow>();
+        //RespawnPointに接触した時の処理
+        playerMove.OnRespawnEnter += HandleRespawnCollision;
+    }
+    //プレイヤーを探すコルーチン
+    IEnumerator FindTarget()
+    {
+        GameObject target = null;
+        while (target == null)
+        {
+            target = GameObject.FindWithTag("Player");
+            if (target == null)
+            {
+                yield return null;  // 1フレーム待機し次のフレームに処理を移行
+            }
+        }
+        playerMove = target.GetComponent<PlayerMove>();
         playerMove = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerMove>();
         playerMove.EnableControl(false);//床に接触するまで動かないようにしておく
         playerMove.OnPlayerCollisionEnter += HandlePlayerCollisionAtStart;//床に接触したら呼ばれる
         playerMove.OnPlayerFirstMove += HandlePlayerFirstMove;//ゲーム開始して最初に動いたら呼ばれる
-        if(timerDisplay!=null)timerDisplay.StopTimer();//始まるまでタイマーを止めておく
-        //メインカメラを探す
-        cameraFollow = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<CameraFollow>();
-        // Itemタグの全オブジェクトを探す
-        GameObject[] itemObjects = GameObject.FindGameObjectsWithTag("Item");
-        if(itemObjects!=null)
-        {
-            items = new Item[itemObjects.Length];
-            for (int i = 0; i < itemObjects.Length; i++)
-            {
-                items[i] = itemObjects[i].GetComponent<Item>();
-                items[i].OnTriggerEnterAndDestroyed += HandleItemDestroyed;//アイテムがPlayerと接触したら呼ばれる
-            }
-        }
-        //スコアのセットと表示
-        if(scoreDisplay!=null && items!=null)
-        {
-            scoreDisplay.SetMaxScore(items.Length);
-            scoreDisplay.SetScore(0);
-        }
-        // Gateタグの全オブジェクトを探す
-        GameObject[] gateObjects = GameObject.FindGameObjectsWithTag("Gate");
-        if(gateObjects!=null)
-        {
-            gates = new GateController[gateObjects.Length];
-            for (int i = 0; i < gateObjects.Length; i++)
-            {
-                gates[i] = gateObjects[i].GetComponent<GateController>();
-            }
-        }
-        //RespawnPointに接触した時の処理
-        playerMove.OnRespawnEnter += HandleRespawnCollision;
-        //PlayerPrefからハイスコア読み込み
-        highScorePoint = PlayerPrefs.GetInt("HighScorePoint",0);
-        highScoreTime = PlayerPrefs.GetFloat("HighScoreTime",0);
-        if(highScoreDisplay!=null&&highScoreTime!=0)SetHighScore(highScorePoint,highScoreTime);//ハイスコアの表示
     }
-
-    //ハイスコアの表示をする関数
-    private void SetHighScore(int score, float time)
-    {
-        highScoreDisplay.text = "High Score "+ScorePointToString(score)+" "+ScoreTimeToString(time);
-    }
-
-    //スコアのポイントをテキスト表示形式に変換する関数
-    private string ScorePointToString(int score)
-    {
-        string pointText = string.Format("Score: {0:00}/{1:00}", score, items.Length);
-        return pointText;
-    }
-
-    //スコアの時間をテキスト表示形式に変換する関数
-    private string ScoreTimeToString(float time)
-    {
-        int minutes = (int)time / 60;
-        int seconds = (int)time % 60;
-        int centiseconds = (int)(time * 100) % 100;  // ミリ秒ではなくセンチ秒（1/100秒）を表示
-        string timerText = string.Format("{0:00}:{1:00}:{2:00}", minutes, seconds, centiseconds);
-        return timerText;
-    }
-
     //スタート時、プレイヤーが最初にコリジョンに接触したときの処理
     //動かすまでタイムがスタートしないようにしている
     private void HandlePlayerCollisionAtStart(Vector3 position)
@@ -105,28 +68,25 @@ public class GameSystem : MonoBehaviour
         playerMove.OnHazardEnter += HandleHazardCollision;//Hazardコリジョンに接触すると呼ばれるイベントの登録
         playerMove.OnGoalEnter += HandleGoalTrigger;//ゴールに到達した時に呼ばれるイベントの登録
     }
-
     //プレイヤーが最初にコリジョンに接触したときに呼ばれるイベント関数
     private void HandlePlayerFirstMove()
     {
-        if(timerDisplay!=null)timerDisplay.StartTimer();      
+        if(scoreDisplay!=null)scoreDisplay.StartTimer();      
     }
-
     //Hazardタグのオブジェクトに接触すると呼び出されるイベント関数
     private void HandleHazardCollision(Vector3 position)
     {
         StartCoroutine(ProcessRespawnSequence());
     }
-
     //リスポーンの処理
     private IEnumerator ProcessRespawnSequence()
     {
-        if(HitSE!=null)HitSE.Play();
+        if(HitSE!=null)audioSource.PlayOneShot(HitSE);
         //リスポーンして地面に落ちるまで操作、アイテム取得、リスポーンポイントの変更を止めておく
         playerIsDead = true;
         playerMove.EnableControl(false);
         playerMove.gameObject.tag = "Untagged";//アイテムはPlayerタグで接触を判別しているので一時的に回避
-        if(timerDisplay!=null)timerDisplay.StopTimer();//タイマーを止めておく
+        if(scoreDisplay!=null)scoreDisplay.StopTimer();//タイマーを止めておく
         playerMove.OnHazardEnter -= HandleHazardCollision;//Hazard判定を止めておく
         if(textController!=null)textController.DisplayMessageWithFade(tutorialMessages[1], 3.0f, 2.0f);
         yield return new WaitForSeconds(3.0f);
@@ -145,51 +105,48 @@ public class GameSystem : MonoBehaviour
         playerMove.EnableControl(true);
         playerMove.OnPlayerCollisionEnter -= HandlePlayerCollisionRespawn;
         playerMove.OnHazardEnter += HandleHazardCollision;
-        if(timerDisplay!=null)timerDisplay.StartTimer();//タイマーを再開
+        if(scoreDisplay!=null)scoreDisplay.StartTimer();//タイマーを再開
     }
-
     //RespawnPointに接触したときの処理
     private void HandleRespawnCollision(Vector3 position)
     {
         if(!playerIsDead)playerRespawnAt = position;//リスポーンポイントの更新
     }
-
    //Goalタグのオブジェクトに接触すると呼び出されるイベント
     private void HandleGoalTrigger(Vector3 position)
     {
         StartCoroutine(ProcessGoalSequence());//ゴールプロセスの開始
     }
-
     //ゴールの処理
     private IEnumerator ProcessGoalSequence()
     {
-        if(PickUpSE!=null)PickUpSE.Play();//音を鳴らす
+        if(PickUpSE!=null)audioSource.PlayOneShot(PickUpSE);//音を鳴らす
         //タイマーや操作、イベントなどを止める処理
-        if(timerDisplay!=null)timerDisplay.StopTimer();
+        if(scoreDisplay!=null)scoreDisplay.StopTimer();
         playerMove.EnableControl(false);
-        playerMove.OnHazardEnter -= HandleGoalTrigger;
-        playerMove.OnHazardEnter -= HandleHazardCollision;//Hazard判定を止めておく
+        playerMove.OnHazardEnter -= HandleGoalTrigger;//ゴール判定を終了
+        playerMove.OnHazardEnter -= HandleHazardCollision;//Hazard判定を終了
         //ゴール表示
         if(textController!=null)textController.DisplayMessage(tutorialMessages[2]);
-        float clearTime = timerDisplay.GetTime();
-        string clearPointText = ScorePointToString(score);
-        string clearTimeText = ScoreTimeToString(clearTime);
-        yield return new WaitForSeconds(1.0f);
-        if(PickUpSE!=null)PickUpSE.Play();
-        if(textController!=null)textController.AddDisplayMessage("\n\n"+clearPointText);
-        yield return new WaitForSeconds(1.0f);
-        if(PickUpSE!=null)PickUpSE.Play();
-        if(textController!=null)textController.AddDisplayMessage("\nTime:"+clearTimeText);
-        //ポイントまたはタイムが更新されていたらハイスコアの更新と表示
-        if(score>highScorePoint || (score>=highScorePoint && clearTime<highScoreTime))
-        {
+        //結果の表示開始
+        if(scoreDisplay!=null){
             yield return new WaitForSeconds(1.0f);
-            SetHighScore(score,clearTime);
-            if(PickUpSE!=null)PickUpSE.Play();
-            if(textController!=null)textController.AddDisplayMessage("\nHigh Score!");
-            PlayerPrefs.SetInt("HighScorePoint",score);
-            PlayerPrefs.SetFloat("HighScoreTime",clearTime);
-            PlayerPrefs.Save();
+            if(PickUpSE!=null)audioSource.PlayOneShot(PickUpSE);//音を鳴らす
+            if(textController!=null)textController.AddDisplayMessage("\n\n"+scoreDisplay.GetCurrentScoreText());
+            yield return new WaitForSeconds(1.0f);
+            if(PickUpSE!=null)audioSource.PlayOneShot(PickUpSE);//音を鳴らす
+            if(textController!=null)
+            {
+                textController.AddDisplayMessage("\nTime:"+scoreDisplay.GetCurrentTimerText());
+                bool isHighscore = scoreDisplay.UpdateHighScoreText();
+                //ハイスコアの更新処理と表示
+                if(isHighscore)
+                {
+                    yield return new WaitForSeconds(1.0f);
+                    if(PickUpSE!=null)audioSource.PlayOneShot(PickUpSE);//音を鳴らす
+                    textController.AddDisplayMessage("\nHigh Score!");
+                }
+            }
         }
     }
 
@@ -198,14 +155,11 @@ public class GameSystem : MonoBehaviour
     {
         ScoreUp();
         // 新しいスコアを全てのGateに通知する
-        if(gates!=null)
+        if(gateList.Count>0)
         {
-            if(gates.Length>0)
+            foreach (var gate in gateList)
             {
-                foreach (var gate in gates)
-                {
-                    gate.UpdateScore(score);
-                }
+                gate.UpdateScore(score);
             }
         }
     }
@@ -215,15 +169,40 @@ public class GameSystem : MonoBehaviour
     {
         score++;
         if(scoreDisplay!=null)scoreDisplay.SetScore(score);
-        if(PickUpSE!=null)PickUpSE.Play();
-        if(IsClearOnAllItemsCollected && score == items.Length){//全アイテム回収でゴールとする場合のゴール判定
+        if(PickUpSE!=null)audioSource.PlayOneShot(PickUpSE);//音を鳴らす
+        if(IsClearOnAllItemsCollected && score == maxScorePoint){//全アイテム回収でゴールとする場合のゴール判定
             StartCoroutine(ProcessGoalSequence());//ゴールプロセスの開始
         }
     }
-
     //リトライの処理
     public void onRetryButtonClick()
     {
         SceneManager.LoadScene("Game");
+    }
+
+    //itemのセット
+    public void SetItems(Item item)
+    {
+        maxScorePoint += 1;
+        item.OnTriggerEnterAndDestroyed += HandleItemDestroyed;//アイテムがPlayerと接触したら呼ばれる
+        //スコアのセットと表示
+        if(scoreDisplay!=null)
+        {
+            scoreDisplay.SetMaxScore(maxScorePoint);
+            scoreDisplay.SetScore(0);
+        }
+    }
+    //gateのセット
+    public void SetGates(GateController gateController)
+    {
+        gateList.Add(gateController);
+    }
+    //TextControllerのセット
+    public void SetTextController(TextController tc){
+        textController = tc;
+    }
+    //ScoreDisplayのセット
+    public void SetScoreDisplay(ScoreDisplay sd){
+        scoreDisplay = sd;
     }
 }

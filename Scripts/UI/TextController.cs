@@ -10,6 +10,23 @@ public class TextController : MonoBehaviour
     void Awake()
     {
         textMesh = GetComponent<TextMeshProUGUI>();
+        textMesh.text = "";
+        StartCoroutine(FindTarget());
+    }
+    //GameSystemを探すコルーチン
+    IEnumerator FindTarget()
+    {
+        GameObject target = null;
+        while (target == null)
+        {
+            target = GameObject.FindWithTag("GameController");
+            if (target == null)
+            {
+                yield return null;  // 1フレーム待機し次のフレームに処理を移行
+            }
+        }
+        GameSystem gameSystem = target.GetComponent<GameSystem>();
+        gameSystem.SetTextController(this);
     }
 
     //テキストを空にする

@@ -7,16 +7,29 @@ public class GateController : MonoBehaviour
     [SerializeField] private float moveDuration;//動く時間
     [SerializeField] private Vector3 moveVector;//この距離だけ動く
 
+    private GameSystem gameSystem;
+
     private Vector3 initialPosition;//初期位置
     private bool isMoved = false;//動いたらtrueになる
-
-    private void Start()
+    private void Awake()
     {
+        StartCoroutine(FindTarget());
         initialPosition = transform.position;
-        if (gameObject.tag != "Gate")
+    }
+    //GameSystemを探すコルーチン
+    IEnumerator FindTarget()
+    {
+        GameObject target = null;
+        while (target == null)
         {
-            Debug.LogError("Gateタグをゲートオブジェクトにセットしてください");
+            target = GameObject.FindWithTag("GameController");
+            if (target == null)
+            {
+                yield return null;  // 1フレーム待機し次のフレームに処理を移行
+            }
         }
+        gameSystem = target.GetComponent<GameSystem>();
+        gameSystem.SetGates(this);//GameSystemからの通知を登録
     }
 
     //スコアが更新されるたびに呼ばれる関数
@@ -26,10 +39,9 @@ public class GateController : MonoBehaviour
         if (!isMoved && score >= scoreThreshold)
         {
             isMoved = true;
-            StartCoroutine("MoveGate");
+            StartCoroutine(MoveGate());
         }
     }
-
     IEnumerator MoveGate()
     {
         float elapsedTime = 0;
