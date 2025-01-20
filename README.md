@@ -10,7 +10,7 @@ Unityの基本的な使い方から学びたい時は先に以下の動画を見
 https://www.youtube.com/watch?v=NgYG1_Si22A
 
 ## スクリプトの解説
-### PlayerMoce.cs
+### PlayerMove.csS
 Sphereを作ってアタッチするとプレイヤーが動きます。
 InputSystemとRigidBodyは自動的にアタッチされます。
 実行時に自動的にPlayerタグのオブジェクトとなりますが、あらかじめPlayerタグにしておくとより安定して動きます。
