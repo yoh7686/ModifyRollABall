@@ -66,7 +66,7 @@ public class PlayerMove : MonoBehaviour
         {
             OnHazardEnter?.Invoke(transform.position);
         } 
-        else if(collision.gameObject.tag == "Goal")//ゴールに入ったときの処理
+        else if(collision.gameObject.tag == "Finish")//ゴールに入ったときの処理
         {
             OnGoalEnter?.Invoke(transform.position);
         }else
@@ -85,7 +85,7 @@ public class PlayerMove : MonoBehaviour
         {
             OnHazardEnter?.Invoke(collider.transform.position);
         }
-        else if(collider.gameObject.tag == "Goal")//ゴールに入ったときの処理
+        else if(collider.gameObject.tag == "Finish")//ゴールに入ったときの処理
         {
             OnGoalEnter?.Invoke(collider.transform.position);
         } 
