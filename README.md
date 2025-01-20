@@ -20,7 +20,7 @@ CubeオブジェクトにアタッチするとPlayerタグのオブジェクト�
 実行時にBoxColliderのisTriggerをTrueにしているのでCube以外にアタッチするときは手動でisTriggerをオンにしてください。
 複数使うことになるのでPreFabにしておきましょう。
 
-### RotateObjext.cs
+### RotateObject.cs
 アタッチすると毎秒設定された回転ベクトルに従って回ります。
 アイテムの回転その他に使います。固定画面の場合は使わなくても問題ありません。
 
