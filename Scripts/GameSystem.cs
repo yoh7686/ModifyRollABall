@@ -31,6 +31,7 @@ public class GameSystem : MonoBehaviour
         tutorialMessages[1]="Respawn!";
         tutorialMessages[2]="Goal!";
         audioSource = gameObject.GetComponent<AudioSource>();
+        audioSource.playOnAwake = false;
     }
     void Start()
     {
