@@ -170,7 +170,7 @@ public class GameSystem : MonoBehaviour
         if(scoreDisplay!=null)
         {
             scoreDisplay.SetScore(score);
-            scoreDisplay.UpdateHighScoreText();
+            scoreDisplay.UpdateScoreDisplay();
         }
         if(PickUpSE!=null)audioSource.PlayOneShot(PickUpSE);//音を鳴らす
         if(IsClearOnAllItemsCollected && score == maxScorePoint){//全アイテム回収でゴールとする場合のゴール判定

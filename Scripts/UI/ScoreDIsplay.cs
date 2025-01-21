@@ -20,6 +20,7 @@ public class ScoreDisplay : MonoBehaviour
 
     void Awake()
     {
+        isStopped = true;
         scoreText = GetComponent<TextMeshProUGUI>();
         scoreText.text = "";
         StartCoroutine(FindTarget());
@@ -67,7 +68,7 @@ public class ScoreDisplay : MonoBehaviour
         }
     }
     //表示の更新
-    void UpdateScoreDisplay(){
+    public void UpdateScoreDisplay(){
         scoreText.text=highScoreText+"Score:"+pointText+" Time:"+timeText;
     }
     //スコアが更新された時に呼ぶ
