@@ -3,7 +3,7 @@ using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(PlayerInput))]
-public class PlayerMove : MonoBehaviour
+public class Player : MonoBehaviour
 {
     public float speed = 10.0f; //速度を設定
     [SerializeField]bool isControlEnabled = true;//操作を受け付けるかどうか
