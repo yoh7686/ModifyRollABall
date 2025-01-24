@@ -113,15 +113,19 @@ Modify Roll A Ball is a set of scripts that allow you to create a basic function
 There’s no need to open a code editor or rewrite the contents.
 
 Instructional video(Japanese audio with English subtitles): 
+
 https://www.youtube.com/watch?v=z0wa-oJv8no  
 
-Long version with all steps included:  
+Long version with all steps included: 
+
 https://www.youtube.com/watch?v=snzUIrrAUy4  
 
 You can try the sample here(Japanese audio with auto-generated English subtitles):  
+
 https://play.unity.com/ja/games/c75aa7ca-4c3a-4c83-af2d-bbf5811cc553/modify-roll-a-ball-with-unity-6  
 
 If you want to learn the basics of Unity first, check out the following video:  
+
 https://www.youtube.com/watch?v=NgYG1_Si22A  
 
 ## Script Explanation
