@@ -1,3 +1,5 @@
+The English version is below.
+
 # Modify Roll A Ballの使い方
 ## はじめに
 Modify Roll A Ballはスクリプトをオブジェクトにアタッチするだけでとりあえず動く、GameSystemをアタッチしてセッティングすればゲームとしても動作するというスクリプトのセットです。
@@ -18,6 +20,15 @@ https://play.unity.com/ja/games/c75aa7ca-4c3a-4c83-af2d-bbf5811cc553/modify-roll
 Unityの基本的な使い方から学びたい時は先に以下の動画を見ておきましょう。
 
 https://www.youtube.com/watch?v=NgYG1_Si22A
+
+## 用語の解説
+### レベルデザイン
+ゲームを遊ぶ空間の設計をすること。
+*難易度調整のことではないので注意してください
+
+### リスポーン
+画面から消えたプレイヤーキャラクター、敵キャラクター、アイテムなどを再生成すること。
+ここではプレイヤーキャラクターが復活することを指しています。
 
 ## スクリプトの解説
 ### Playerフォルダ
@@ -95,4 +106,108 @@ Cubeオブジェクトにアタッチすると、実行時にタグがRespawn、
 ## まとめ
 スクリプトをオブジェクトにアタッチし、タグとインスペクタを設定するとレベルデザイン（ゲームを遊ぶ空間の設計）次第でRoll A Ballを迷路ゲーム、アクションゲーム、レースゲームのようなものに改造することができます。
 ぜひいろんなRollABallを作ってSNSやUnity Playに投稿してみてください。ハッシュタグは#RollABallChallangeです。
+
+# How to Use Modify Roll A Ball
+## Introduction
+Modify Roll A Ball is a set of scripts that allow you to create a basic functioning game just by attaching them to objects. By attaching the GameSystem and configuring the settings, it works as a complete game.  
+There’s no need to open a code editor or rewrite the contents.
+
+Instructional video:  
+https://www.youtube.com/watch?v=z0wa-oJv8no  
+
+Long version with all steps included:  
+https://www.youtube.com/watch?v=snzUIrrAUy4  
+
+You can try the sample here:  
+https://play.unity.com/ja/games/c75aa7ca-4c3a-4c83-af2d-bbf5811cc553/modify-roll-a-ball-with-unity-6  
+
+If you want to learn the basics of Unity first, check out the following video:  
+https://www.youtube.com/watch?v=NgYG1_Si22A  
+
+## Script Explanation
+### Player Folder
+#### Player.cs
+Create a Sphere and attach the script to make it the player.  
+InputSystem and RigidBody will automatically be attached.  
+During runtime, the object will automatically become a Player-tagged object, but preassigning the Player tag will ensure more stable behavior.
+
+#### CameraFollow.cs
+Attach this to the camera to have it follow Player-tagged objects while maintaining the initial distance.  
+You can adjust the follow speed by modifying the `smoothTime` parameter.
+
+### Item Folder
+#### Item.cs
+Attach this to a Cube object to make it disappear upon collision with a Player-tagged object.  
+The `isTrigger` property of the BoxCollider will automatically be turned off during runtime.  
+Since you’ll use it frequently, consider turning it into a Prefab.
+
+#### RotateObject.cs
+Attach this script to rotate the object at a specified angular velocity per second.  
+You can use it for items, hazards, floors, or any other object you wish to rotate.
+
+### GameSystem
+Attach this to an Empty GameObject or a similar object.  
+During runtime, it will automatically become a GameController-tagged object, but assigning the tag in advance will ensure more stable operation.  
+
+- Attach an AudioClip for `PickUpSE` to play a sound when picking up an item.  
+- Attach an AudioClip for `HitSE` for a sound when hitting a hazard.  
+These are optional; the system will still work without them.  
+Sample sound effect files are provided in the Audio folder.  
+
+Pressing the Enter key will reload the scene. If you’ve renamed the initial scene (default is `SampleScene`), update the scene reference in the Inspector accordingly.
+
+### UI Folder
+#### TextController.cs
+Attach this to a TextMeshPro object under a Canvas to display tutorial or clear messages.  
+Use this together with `GameSystem.cs`.
+
+#### ScoreDisplay.cs
+Attach this to a TextMeshPro object under a Canvas to display the number of collected items and elapsed time.  
+It also records high scores and displays them if a score exists.  
+Use this together with `GameSystem.cs`.
+
+#### RestartButton.cs
+Create a Button UI object and attach this script to make it function as a restart button.  
+You can configure the destination scene in the Inspector of the GameSystem object.
+
+With the steps above, you can create a basic Roll A Ball game.  
+Design the ground and walls, place items, and create a Roll A Ball game where the goal is to collect all the items as fast as possible.
+
+From here onwards, we’ll explain how to add obstacles, objects triggered by collecting items, and goal areas to enhance your Roll A Ball game.
+
+### Level Folder
+#### Hazard.cs
+Attach this script to a Cube to make it a Hazard object. If the Player collides with it, they will be sent back to the Respawn point.  
+Combine it with `RotateObject.cs` to create moving hazards. Keep the appearance consistent by using the same materials.  
+
+If you set `isHazardTrigger` to `True`, the MeshRenderer will be turned off during runtime, and it will function as a Hazard area. You can use this for no-entry zones like fall-detection areas.  
+Hazard-tagged objects with a Trigger set will behave similarly.
+
+#### Respawn.cs
+Attach this to a Cube object to make it a Respawn point. During runtime, the object will automatically:  
+- Be assigned the Respawn tag.  
+- Have its MeshRenderer turned off.  
+- Have its Collider's `isTrigger` property set to `True`.  
+
+If a Player touches the Respawn area, the Respawn point is updated. Changing the Respawn point makes it easier to retry challenging sections. Alternatively, omitting Respawn points can increase the difficulty.  
+Objects with a Respawn tag and a Trigger behave the same way.
+
+#### Gate.cs
+Attach this to a Cube or similar object. In the Inspector, you can configure how many items the Player needs to collect, how many seconds the process takes, and how far the object moves.  
+Using this, you can create gates that open or bridges that connect when a certain number of items are collected.
+
+#### Goal.cs
+Attach this to a Cube object to make it a goal area. During runtime, the object will automatically:  
+- Be assigned the Respawn tag.  
+- Have its MeshRenderer turned off.  
+- Have its Collider’s `isTrigger` property set to `True`.  
+
+By default, clearing the game requires collecting all items. Setting `IsClearOnAllItemsCollected` to `False` makes reaching the goal necessary to clear the game.  
+High scores prioritize the number of items collected, and if tied, faster times result in higher scores.  
+Objects with a Finish tag and a Trigger behave the same way.
+
+## Summary
+By attaching scripts to objects and configuring tags and Inspector settings, you can modify Roll A Ball into different types of games, such as maze games, action games, or racing games, depending on your level design.  
+
+Feel free to create various Roll A Ball games and share them on social media or Unity Play. The hashtag is #RollABallChallenge.  
 
