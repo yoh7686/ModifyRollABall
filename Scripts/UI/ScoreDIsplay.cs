@@ -1,6 +1,7 @@
 using TMPro;
 using UnityEngine;
 using System.Collections;
+using UnityEngine.InputSystem;
 
 public class ScoreDisplay : MonoBehaviour
 {
@@ -63,7 +64,8 @@ public class ScoreDisplay : MonoBehaviour
             timeText = SetTimerText(currentTime);
             UpdateScoreDisplay();
         }
-        if(Input.GetKeyDown(KeyCode.Return)){
+        if (Keyboard.current != null && Keyboard.current.enterKey.wasPressedThisFrame)
+        {
             gameSystem.onRetryButtonClick();
         }
     }
